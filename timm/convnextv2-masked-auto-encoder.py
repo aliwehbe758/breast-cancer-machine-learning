@@ -97,7 +97,6 @@ class ImageReconstructionModel(nn.Module):
     def __init__(self, base_model):
         super(ImageReconstructionModel, self).__init__()
         self.encoder = base_model
-        # self.mask_percentage = mask_percentage  # Percentage of the image dimensions used for grid masking
         self.decoder = nn.Sequential(
             nn.ConvTranspose2d(1024, 512, kernel_size=3, stride=2, padding=1, output_padding=1),  # 7x7 -> 14x14
             nn.ReLU(True),
@@ -112,21 +111,6 @@ class ImageReconstructionModel(nn.Module):
             nn.ConvTranspose2d(32, 3, kernel_size=1, stride=1),  # Output 224x224 with 3 channels (RGB)
             nn.Tanh()
         )
-
-    # def apply_grid_mask(self, image):
-    #     B, C, H, W = image.shape
-    #     grid_size_h = int(H * (self.grid_percentage / 100))
-    #     grid_size_w = int(W * (self.grid_percentage / 100))
-
-    #     mask = torch.ones_like(image)
-
-    #     for i in range(0, H, grid_size_h):
-    #         for j in range(0, W, grid_size_w):
-    #             if (i // grid_size_h + j // grid_size_w) % 2 == 0:
-    #                 mask[:, :, i:i + grid_size_h, j:j + grid_size_w] = 0
-
-    #     masked_image = image * mask
-    #     return masked_image, mask
 
     def apply_grid_mask(self, x, mask_ratio=0.5):
         # Apply grid masking
@@ -211,10 +195,6 @@ if __name__=='__main__':
     # Define transformations
     train_transform = transforms.Compose([
         ResizeWithPad(new_shape=(input_size, input_size)),
-        transforms.RandomHorizontalFlip(),
-        transforms.RandomVerticalFlip(),  # Add vertical flip
-        transforms.RandomRotation(15),  # Increase rotation angle
-        transforms.ColorJitter(brightness=0.2, contrast=0.2),  # Slightly stronger jitter
         transforms.ToTensor(),
         CustomNormalize()
     ])
