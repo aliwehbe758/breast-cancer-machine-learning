@@ -160,10 +160,6 @@ if __name__=='__main__':
     # Define transformations
     train_transform = transforms.Compose([
         ResizeWithPad(new_shape=(input_size, input_size)),
-        transforms.RandomHorizontalFlip(),
-        transforms.RandomVerticalFlip(),  # Add vertical flip
-        transforms.RandomRotation(15),  # Increase rotation angle
-        transforms.ColorJitter(brightness=0.2, contrast=0.2),  # Slightly stronger jitter
         transforms.ToTensor(),
         CustomNormalize()
     ])
