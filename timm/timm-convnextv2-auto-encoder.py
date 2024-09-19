@@ -201,7 +201,7 @@ if __name__=='__main__':
     val_psnr_metric = PeakSignalNoiseRatio().to(device)
     val_ssim_metric = StructuralSimilarityIndexMeasure().to(device)
 
-    num_epochs = 1000
+    num_epochs = 500
     best_loss = float('inf')  # Initialize with infinity
 
     train_losses, val_losses = [], []
