@@ -287,7 +287,7 @@ if __name__=='__main__':
 
         print(f"Epoch: [{epoch + 1}/{num_epochs}]")
         print(
-            f"Loss: {avg_loss:.4f}, Contrastive Accuracy: {avg_acc:.4f}, "f"CosineSsimilarity: {avg_cosine_sim:.4f}, Alignment: {avg_align:.4f}, Uuniformity: {avg_unif:.4f}")
+            f"Loss: {avg_loss:.4f}, Contrastive Accuracy: {avg_acc:.4f}, "f"Cosine Similarity: {avg_cosine_sim:.4f}, Alignment: {avg_align:.4f}, Uniformity: {avg_unif:.4f}")
 
         # Save the best model
         if avg_loss < best_loss:
