@@ -76,23 +76,6 @@ class ResizeWithPad(nn.Module):
         return x
 
 
-class CustomNormalize(nn.Module):
-    def __init__(self):
-        super(CustomNormalize, self).__init__()
-
-    def forward(self, image):
-        if not isinstance(image, torch.Tensor):
-            raise TypeError("Expected input to be a torch.Tensor")
-
-        normalized_image, mean, std = self.normalize(image)
-        return normalized_image, mean, std
-
-    def normalize(self, image):
-        mean = image.mean()
-        std = image.std()
-        normalized_image = (image - mean) / std
-        return normalized_image, mean, std
-
 class ImageReconstructionModel(nn.Module):
     def __init__(self, base_model):
         super(ImageReconstructionModel, self).__init__()
@@ -133,7 +116,7 @@ class ImageReconstructionModel(nn.Module):
 
     def forward(self, x):
         masked_x, mask = self.apply_grid_mask(x)
-        features = self.encoder.forward_features(masked_x)
+        features = self.encoder(masked_x)
         reconstructed = self.decoder(features)
         return reconstructed, mask, masked_x
 
@@ -196,12 +179,12 @@ if __name__=='__main__':
     train_transform = transforms.Compose([
         ResizeWithPad(new_shape=(input_size, input_size)),
         transforms.ToTensor(),
-        CustomNormalize()
+        transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
     ])
     test_transform = transforms.Compose([
         ResizeWithPad(new_shape=(input_size, input_size)),
         transforms.ToTensor(),
-        CustomNormalize()
+        transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
     ])
 
     # Load the datasets
@@ -220,7 +203,7 @@ if __name__=='__main__':
     model = timm.create_model('convnextv2_base.fcmae_ft_in22k_in1k_384', pretrained=True)
 
     # Remove the classifier head
-    model.reset_classifier(0)
+    model.reset_classifier(num_classes=0, global_pool='')
 
     # Initialize the model
     reconstruction_model = ImageReconstructionModel(model).to(device)
@@ -291,6 +274,11 @@ if __name__=='__main__':
         if train_loss < best_loss:
             best_loss = train_loss
             torch.save(reconstruction_model.state_dict(), './convnextv2-masked-auto-encoder.pth')
+
+            pretrained_convnext_backbone = reconstruction_model.encoder
+            state_dict = {"convnext_parameters": pretrained_convnext_backbone.state_dict()}
+            torch.save(state_dict(), './convnextv2-masked-auto-encoder-backbone.pth')
+
             print(f'Best model saved with validation loss: {best_loss:.4f}')
             print('------------------------------------------------------------------------------------------------')
         else:

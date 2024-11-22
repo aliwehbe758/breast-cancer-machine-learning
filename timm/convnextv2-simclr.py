@@ -226,8 +226,8 @@ if __name__=='__main__':
     print(f"Validation dataset size: {len(test_dataset)}")
 
     convnextv2 = timm.create_model('convnextv2_base.fcmae_ft_in22k_in1k_384', pretrained=True)
-    backbone = nn.Sequential(*list(convnextv2.children())[:-1])
-    model = SimCLR(backbone).to(device)
+    convnextv2.reset_classifier(num_classes=0, global_pool='')
+    model = SimCLR(convnextv2).to(device)
 
     criterion = NTXentLoss()
     optimizer = optim.AdamW(model.parameters(), lr=lr)
